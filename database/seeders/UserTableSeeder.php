@@ -22,7 +22,7 @@ class UserTableSeeder extends Seeder
                 'name'      => 'Admin',
                 'email'     => 'admin@mail.com',
                 'address'   => 'Planet Lain',
-                'photo'     => 'photo_not_available.png',
+                'photo'     => null,
                 'role_id'   => 1,
                 'is_active' => true,
                 'password'  => Hash::make('admin123!')
@@ -32,7 +32,7 @@ class UserTableSeeder extends Seeder
                 'name'      => 'User',
                 'email'     => 'user@mail.com',
                 'address'   => 'Planet Lain',
-                'photo'     => 'photo_not_available.png',
+                'photo'     => null,
                 'role_id'   => 2,
                 'is_active' => false,
                 'password'  => Hash::make('user123!')
