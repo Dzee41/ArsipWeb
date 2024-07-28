@@ -18,9 +18,7 @@ use App\Models\Category;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 
@@ -46,6 +44,7 @@ Route::get('/archives/{id}', [ManagementArchiveController::class, 'archivesIndex
 
 // MANAGEMENT DOCS
 // Route::get('/archive/{id}', [ManagementArchiveController::class, 'archiveShow'])->name('archive');
+Route::get('/documents', [ManagementArchiveController::class, 'archivesIndexAll'])->name('documents.archivesIndexAll');
 Route::get('/documents/{id}', [ManagementArchiveController::class, 'archiveShow'])->name('documents.archiveShow');
 Route::get('tab-archives', [ManagementArchiveController::class, 'tabArchives'])->name('tab-archives');
 Route::get('new-document/{id}', [ManagementArchiveController::class, 'createDocument'])->name('new-document');
@@ -55,7 +54,7 @@ Route::get('/download/{file}', [ManagementArchiveController::class, 'download'])
 // Route::get('/edit-archive/{id}', [ManagementArchiveController::class, 'editArchive'])->name('edit-archive.editArchive');
 Route::get('/documents/{id}/category', [ManagementArchiveController::class, 'editArchive'])->name('edit-archive.editArchive');
 Route::post('/update-archive', [ManagementArchiveController::class, 'updateArchive'])->name('update-archive.updateArchive');
-Route::delete('/destroy-archive', [ManagementArchiveController::class, 'destroyArchive'])->name('destroy-archive.destroyArchive');
+Route::delete('/destroy-archive/{id}', [ManagementArchiveController::class, 'destroyArchive'])->name('destroy-archive.destroyArchive');
 
 
 Route::get('/preview/pdf/{file}', [ManagementArchiveController::class, 'previewPdf'])->name('file.preview.pdf');
