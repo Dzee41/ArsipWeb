@@ -1,6 +1,6 @@
 <ul class="nav nav-pills flex-column flex-md-row mb-3">
     <li class="nav-item">
-        <a class="nav-link {{ $currentRouteName == 'edit-profile' ? 'active' : '' }}"
+        <a class="nav-link {{ $currentRouteName == 'edit-profile' || $currentRouteName == 'edit-user-profile' ? 'active' : '' }}"
             href="{{ route('edit-profile') }}"><i class="bx bx-user me-1"></i>
             Account</a>
     </li>

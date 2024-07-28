@@ -29,23 +29,27 @@
                     @if (auth()->user()->photo)
                         <img src="{{ asset('storage/photos/' . auth()->user()->photo) }}" alt="image navbar"
                             class="w-px-40 h-auto rounded-circle" />
+                        {{-- <img src="{{ asset('storage/photos/' . auth()->user()->photo) }}" alt="image navbar"
+                            class="w-px-40 h-auto rounded-circle" /> --}}
                     @else
-                        <img src="{{ asset('storage/photos/no_photo/photo_not_available.png') }}" alt="image navbar"
+                        <img src="https://telegra.ph/file/fb2c4eb538d7585177123.png" alt="image navbar"
                             class="w-px-40 h-auto rounded-circle" />
                     @endif
                 </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="{{ route('edit-profile') }}">
                         <div class="d-flex">
                             <div class="flex-shrink-0 me-3">
                                 <div class="avatar avatar-online">
                                     @if (auth()->user()->photo)
                                         <img src="{{ asset('storage/photos/' . auth()->user()->photo) }}" alt
                                             class="w-px-40 h-auto rounded-circle" />
+                                        {{-- <img src="{{ asset('storage/photos/' . auth()->user()->photo) }}" alt
+                                            class="w-px-40 h-auto rounded-circle" /> --}}
                                     @else
-                                        <img src="{{ asset('storage/photos/no_photo/photo_not_available.png') }}" alt
+                                        <img src="https://telegra.ph/file/fb2c4eb538d7585177123.png" alt
                                             class="w-px-40 h-auto rounded-circle" />
                                     @endif
                                 </div>
@@ -61,7 +65,7 @@
                     <div class="dropdown-divider"></div>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="{{ route('edit-profile') }}">
                         <i class="bx bx-user me-2"></i>
                         <span class="align-middle">My Profile</span>
                     </a>

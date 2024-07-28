@@ -1,5 +1,5 @@
 <div class="app-brand demo">
-    <a href="index.html" class="app-brand-link">
+    <a href="{{ route('home') }}" class="app-brand-link">
         <span class="app-brand-text demo menu-text fw-bolder"><span style="color: #696cff;">archives</span>.app</span>
     </a>
 
@@ -12,8 +12,8 @@
 
 <ul class="menu-inner py-1">
     <!-- Dashboard -->
-    <li class="menu-item active">
-        <a href="index.html" class="menu-link">
+    <li class="menu-item {{ request()->routeIs('home') ? 'active' : '' }}">
+        <a href="{{ route('home') }}" class="menu-link">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
             <div data-i18n="Analytics">Dashboard</div>
         </a>
@@ -24,37 +24,61 @@
         <span class="menu-header-text">Pages</span>
     </li>
     {{-- documents --}}
-    <li class="menu-item">
+    <li 
+        class="menu-item {{ request()->routeIs('categories') || 
+            request()->routeIs('documents.archivesIndexAll') || 
+            request()->routeIs('documents.archiveShow') ||
+            request()->routeIs('new-document') ||
+            request()->routeIs('edit-archive.editArchive')
+            ? 'active open' : '' }}">
         <a href="javascript:void(0)" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-file"></i>
             <div data-i18n="User interface">Documents</div>
         </a>
         <ul class="menu-sub">
-            <li class="menu-item">
+            <li class="menu-item {{ request()->routeIs('categories') ? 'active' : '' }}">
                 <a href="{{ route('categories') }}" class="menu-link">
                     <div data-i18n="Accordion">Categories</div>
                 </a>
             </li>
-            <li class="menu-item">
-                <a href="{{ route('documents.archiveShow', 1) }}" class="menu-link">
+            <li 
+                class="menu-item {{ request()->routeIs('documents.archivesIndexAll') || 
+                    request()->routeIs('documents.archiveShow') ||
+                    request()->routeIs('new-document') ||
+                    request()->routeIs('edit-archive.editArchive')
+                    ? 'active' : '' }}">
+                <a href="{{ route('documents.archivesIndexAll') }}" class="menu-link">
                     <div data-i18n="Accordion">Archives</div>
                 </a>
             </li>
         </ul>
     </li>
     {{-- management users --}}
-    <li class="menu-item">
+    <li 
+        class="menu-item {{ request()->routeIs('users-index') || 
+            request()->routeIs('create-user') ||
+            request()->routeIs('edit-profile') ||
+            request()->routeIs('change_password') ||
+            request()->routeIs('edit-user-profile') 
+            ? 'active open' : '' }}">
         <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
             <div data-i18n="Authentications">Management Accounts</div>
         </a>
         <ul class="menu-sub">
-            <li class="menu-item">
+            <li 
+                class="menu-item {{ request()->routeIs('users-index') ||
+                    request()->routeIs('create-user') ||
+                    request()->routeIs('edit-user-profile')
+                    ? 'active' : '' }}">
                 <a href="{{ route('users-index') }}" class="menu-link">
                     <div data-i18n="Basic">Management Users</div>
                 </a>
             </li>
-            <li class="menu-item">
+            <li 
+                class="menu-item {{ request()->routeIs('edit-profile') ||
+                    request()->routeIs('change_password') 
+                    ? 'active' : '' }}">
                 <a href="{{ route('edit-profile') }}" class="menu-link">
                     <div data-i18n="Basic">Account Setting</div>
                 </a>
