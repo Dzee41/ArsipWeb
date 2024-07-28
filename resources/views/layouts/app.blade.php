@@ -26,6 +26,9 @@
 
     @yield('login-content')
 
+    <!-- ======= Sweetalert ======= -->
+    @include('sweetalert::alert')
+    <!-- End Sweetalert -->
 
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
@@ -71,6 +74,7 @@
     <!-- / Layout wrapper -->
     @include('layouts.scripts')
     {!! Toastr::message() !!}
+    @yield('sweetalert2')
 </body>
 
 </html>

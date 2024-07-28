@@ -182,6 +182,9 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+        // SweetAlert2
+        RealRashid\SweetAlert\SweetAlertServiceProvider::class,
+
         /*
          * Package Service Providers...
          */
