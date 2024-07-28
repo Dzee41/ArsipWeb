@@ -4,8 +4,13 @@
         $category_header = \App\Models\Category::latest()->get();
         $no = 1;
         $id_from_request = 1;
-        $categories = \App\Models\Category::with('archives')->findOrFail($id_from_request ?? 1);
-        $category = \App\Models\Category::findOrFail($id_from_request);
+        try {
+            $categories = \App\Models\Category::with('archives')->findOrFail($id_from_request ?? 1);
+            $category = $categories;
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            //throw $th;
+            $category = null;
+        }
     @endphp
     @if (session('error'))
         <script>
@@ -41,9 +46,11 @@
             </ul>
         </div>
 
-        <a href="{{ route('new-document', $category->id) }}" class="btn btn-success btn-small">
-            <i class='bx bx-folder-plus text-sm-end' ></i> Input Dokumen
-        </a>
+        @if ($category)
+            <a href="{{ route('new-document', $category->id) }}" class="btn btn-success btn-small">
+                <i class='bx bx-folder-plus text-sm-end'></i> Input Dokumen
+            </a>
+        @endif
 
         <div class="nav-align-top mb-4 pt-3">
             <div class="tab-content">
