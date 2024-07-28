@@ -20,6 +20,8 @@
         rel="stylesheet" />
 
     @include('layouts.styles')
+    @stack('script')
+
 </head>
 
 <body>

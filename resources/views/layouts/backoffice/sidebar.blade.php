@@ -29,7 +29,8 @@
             request()->routeIs('documents.archivesIndexAll') || 
             request()->routeIs('documents.archiveShow') ||
             request()->routeIs('new-document') ||
-            request()->routeIs('edit-archive.editArchive')
+            request()->routeIs('edit-archive.editArchive') ||
+            request()->routeIs('file.preview')
             ? 'active open' : '' }}">
         <a href="javascript:void(0)" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-file"></i>
@@ -45,7 +46,8 @@
                 class="menu-item {{ request()->routeIs('documents.archivesIndexAll') || 
                     request()->routeIs('documents.archiveShow') ||
                     request()->routeIs('new-document') ||
-                    request()->routeIs('edit-archive.editArchive')
+                    request()->routeIs('edit-archive.editArchive') ||
+                    request()->routeIs('file.preview')
                     ? 'active' : '' }}">
                 <a href="{{ route('documents.archivesIndexAll') }}" class="menu-link">
                     <div data-i18n="Accordion">Archives</div>
