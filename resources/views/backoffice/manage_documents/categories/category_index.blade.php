@@ -44,11 +44,11 @@
                                             <button data-id="{{ $item->id }}" data-bs-toggle="modal"
                                                 data-bs-target="#modalEditCategory{{ $item->id }}"
                                                 class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Edit</button>
-                                            <form action="{{ route('category-delete', $item->id) }}" method="POST">
+                                            <form id="formDelete" method="POST">
                                                 @method('DELETE')
                                                 @csrf
-                                                <button onclick="alert('are your sure to delete category!')"
-                                                    class="dropdown-item"><i class="bx bx-trash me-1"></i>
+                                                <button data-action="{{ route('category-delete', $item->id) }}"
+                                                    class="dropdown-item btnDelete"><i class="bx bx-trash me-1"></i>
                                                     Delete</button>
                                             </form>
                                         </div>
@@ -91,4 +91,46 @@
             });
         </script>
     @endpush
+@endsection
+
+@section('sweetalert2')
+<script type="text/javascript">
+
+    $('body').on('click', '.btnDelete', function(e) {
+        e.preventDefault();
+        var action = $(this).data('action');
+        Swal.fire({
+            title: 'Yakin ingin menghapus kategori ?',
+            text: "Data yang sudah dihapus tidak bisa dikembalikan lagi",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Batal',
+            confirmButtonText: 'Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#formDelete').attr('action', action);
+                $('#formDelete').submit();
+            }
+        })
+    })
+
+    // @if ($errors->all())
+    // {
+    //     Swal.fire({
+    //     title: 'Gagal Hapus kategori',
+    //     html: 
+    //         [
+    //             @foreach ($errors->all() as $error)
+    //                 '- {{$error}}<br>',
+    //             @endforeach
+    //         ],
+    //     icon: 'error',
+    //     showConfirmButton: true
+    //     });
+    // }
+    // @endif
+
+</script>
 @endsection

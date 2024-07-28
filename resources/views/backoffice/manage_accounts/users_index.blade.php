@@ -38,7 +38,13 @@
                                     <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
                                         <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
                                             class="avatar avatar-xs pull-up" title="{{ $item->name }}">
-                                            <img src="../assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
+                                            @if ($item->photo)
+                                                <img src="{{ asset('storage/photos/' . $item->photo) }}" alt="user-avatar"
+                                                    class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+                                            @else
+                                                <img src="https://telegra.ph/file/fb2c4eb538d7585177123.png" alt="user-avatar"
+                                                    class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
+                                            @endif
                                         </li>
                                     </ul>
                                 </td>
@@ -92,11 +98,11 @@
                                                     class="bx bx-edit me-1"></i>
                                                 Edit</a>
 
-                                            <form action="{{ route('delete-user', $item->id) }}" method="POST">
+                                            <form id="formDelete" method="POST">
                                                 @method('DELETE')
                                                 @csrf
-                                                <button onclick="alert('sure to delete user?')" type="submit"
-                                                    class="dropdown-item"><i class="bx bx-trash me-1"></i>
+                                                <button data-action="{{ route('delete-user', $item->id) }}"
+                                                    class="dropdown-item btnDelete"><i class="bx bx-trash me-1"></i>
                                                     Delete</button>
                                             </form>
                                         </div>
@@ -110,4 +116,46 @@
         </div>
         <!--/ Basic Bootstrap Table -->
     </div>
+@endsection
+
+@section('sweetalert2')
+<script type="text/javascript">
+
+    $('body').on('click', '.btnDelete', function(e) {
+        e.preventDefault();
+        var action = $(this).data('action');
+        Swal.fire({
+            title: 'Yakin ingin menghapus user ?',
+            text: "Data yang sudah dihapus tidak bisa dikembalikan lagi",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Batal',
+            confirmButtonText: 'Hapus'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#formDelete').attr('action', action);
+                $('#formDelete').submit();
+            }
+        })
+    })
+
+    // @if ($errors->all())
+    // {
+    //     Swal.fire({
+    //     title: 'Gagal Hapus kategori',
+    //     html: 
+    //         [
+    //             @foreach ($errors->all() as $error)
+    //                 '- {{$error}}<br>',
+    //             @endforeach
+    //         ],
+    //     icon: 'error',
+    //     showConfirmButton: true
+    //     });
+    // }
+    // @endif
+
+</script>
 @endsection

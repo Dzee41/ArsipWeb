@@ -24,9 +24,8 @@
                                     <img src="{{ asset('storage/photos/' . $user->photo) }}" alt="user-avatar"
                                         class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
                                 @else
-                                    <img src="{{ asset('storage/photos/no_photo/photo_not_available.png') }}"
-                                        alt="user-avatar" class="d-block rounded" height="100" width="100"
-                                        id="uploadedAvatar" />
+                                    <img src="https://telegra.ph/file/fb2c4eb538d7585177123.png" alt="user-avatar"
+                                        class="d-block rounded" height="100" width="100" id="uploadedAvatar" />
                                 @endif
                                 <div class="button-wrapper">
                                     <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">

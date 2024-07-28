@@ -10,10 +10,8 @@
             <div class="col-xxl">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <form action="{{ route('update-archive.updateArchive') }}" method="POST"
-                            enctype="multipart/form-data">
+                        <form action="{{ route('update-archive.updateArchive') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            @method('POST')
                             <input hidden type="text" name="update_arc_id" value="{{ $get_archive_value->id }}">
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Title</label>
@@ -36,7 +34,7 @@
                                         <option selected>--Select Category--</option>
                                         @foreach ($categories as $item)
                                             <option value="{{ $item->id }}"
-                                                {{ $item->id === $form_category->id ? 'selected' : '' }}>
+                                                {{ $item->id === $get_archive_value->category_id ? 'selected' : '' }}>
                                                 {{ $item->category_name }}</option>
                                         @endforeach
                                     </select>
@@ -81,7 +79,7 @@
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
                                     <div class="btn-group">
-                                        <button type="submit" class="btn btn-primary">Save</button>
+                                        <button class="btn btn-primary">Save</button>
                                         {{-- <button type="submit" class="btn btn-dark">Preview</button> --}}
                                     </div>
                                 </div>
