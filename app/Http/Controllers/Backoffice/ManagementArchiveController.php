@@ -16,6 +16,11 @@ use App\DataTables\ArchivesDataTable;
 use App\DataTables\ArchivesDataTableEditor;
 use DataTables;
 
+use Illuminate\Support\Facades\Log;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+
 class ManagementArchiveController extends Controller
 {
     public function categoryIndex()
@@ -28,42 +33,92 @@ class ManagementArchiveController extends Controller
 
     public function categoryStore()
     {
-        $request                    = request();
-        $request->validate([
-            'category_name' => 'required|string',
-            'used_for'      => 'required|string',
-        ]);
-        $categories                 = new Category();
-        $categories->category_name  = $request->category_name;
-        $categories->used_for       = $request->used_for;
-        $categories->save();
-        \Toastr::success('Category is Created successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('categories');
+        try {
+            $request = request();
+            $request->validate([
+                'category_name' => 'required|string',
+                'used_for'      => 'required|string',
+                'tab_routes'      => 'nullable|string',
+            ],
+            [
+                'category_name.required' => 'Nama kategori wajib di isi!',
+                'used_for.required' => 'Deskripsi wajib di isi!',
+            ]);
+            $categories                 = new Category();
+            $categories->category_name  = $request->category_name;
+            $categories->used_for       = $request->used_for;        
+            $categories->tab_routes     = $request->tab_routes ?: Str::slug($request->category_name, '_');
+            $categories->save();
+            Alert::success('Success', 'Kategori berhasil dibuat!');
+            return redirect()->route('categories');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }               
     }
 
     public function categoryUpdate()
     {
-        $request    = request();
-        $request->validate([
-            'category_name' => 'required|string',
-            'used_for'      => 'required|string'
-        ]);
-        $id         = $request->item_id;
-        $category   = Category::findOrFail($id);
-        $category->category_name    = $request->category_name;
-        $category->used_for         = $request->used_for;
-        $category->save();
-        \Toastr::success('Category is Update successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('categories');
+        try {
+            $request    = request();
+            $request->validate([
+                'category_name' => 'required|string',
+                'used_for'      => 'required|string'
+            ]);
+            $id         = $request->item_id;
+            $category   = Category::findOrFail($id);
+            $category->category_name    = $request->category_name;
+            $category->used_for         = $request->used_for;
+            $category->save();
+            
+            Alert::success('Success', 'Update kategori berhasil!');
+            return redirect()->route('categories');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }            
     }
 
     public function categoryDestroy($id)
     {
-        $category = Category::findOrFail($id);
-        if(!$category) \Toastr::error('Category Not Found!', 'Error', ["positionClass" => "toast-top-right"]);
-        $category->delete();
-        \Toastr::success('Category is Delete successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('categories');
+        try {
+            $category = Category::findOrFail($id);
+
+            // Cek kategori berelasi dengan tabel 'archives'
+            if ($category->archives()->exists()) {
+                Alert::error('Error', 'Gagal hapus, kategori mempunyai koneksi!');
+                return redirect()->back()->withInput();
+            }
+
+            $category->delete();
+
+            Alert::success('Success', 'Hapus kategori berhasil!');
+            return redirect()->route('categories');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }     
+
+        
+    }
+
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------
+
+    public function archivesIndexAll()
+    {
+        $archives = Archive::with('category')->get();
+
+        // format tgl
+        foreach ($archives as $archive) {
+            $archive->formatted_created_at = Carbon::parse($archive->created_at)->isoFormat('dddd, D MMMM YYYY, HH:mm', 'id');
+            $archive->formatted_updated_at = Carbon::parse($archive->updated_at)->isoFormat('dddd, D MMMM YYYY, HH:mm', 'id');
+        }
+
+        return view('backoffice.manage_documents.archives.archives_all_index', [
+            'archives' => $archives,
+        ]);
     }
 
     public function archivesIndex($id=null)
@@ -98,6 +153,16 @@ class ManagementArchiveController extends Controller
         $data['category_for_edit']  = Category::all();
 
         $data['files']               = File::files(public_path('storage/uploads'));
+
+        // format tgl
+        foreach ($data['categories']->archives as $archive) {
+            $archive->formatted_created_at = Carbon::parse($archive->created_at)->translatedFormat('l, j F Y, H:i');
+            $archive->formatted_updated_at = Carbon::parse($archive->updated_at)->translatedFormat('l, j F Y, H:i');
+        }
+
+        // dd($archive->formatted_updated_at);
+
+
         return view('backoffice.manage_documents.archives._archive_table', $data);
     }
 
@@ -112,45 +177,73 @@ class ManagementArchiveController extends Controller
     public function storeDocument(Request $request, $id)
     {
 
-        $request->validate([
-            'file' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,odt|max:20480', // Maks 20MB
-            'title' => 'required|string',
-            'description' => 'required|string'
-        ]);
-        // dd($request->file->originalName);
-        // dd($request->all());
-
-       $archive                 = new Archive();
-       $archive->title          = $request->title;
-       $archive->description    = $request->description;
-       $archive->category_id    = $id;
-
-       // Simpan file
-       if ($request->file()) {
-            // $fileName = $request->title.'_'.$request->file->getClientOriginalName();
-            $fileName = $request->id.'_'.$request->title.'.'.$request->file->extension();
-            $filePath = $request->file('file')->storeAs('uploads', $fileName, 'public');
-       }
-
-       $archive->file = $fileName;
-
-       $archive->user_id        = \Auth::user()->id;
-       $archive->save();
-       \Toastr::success('Save archive successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-       return redirect()->route('documents.archiveShow', ['id' =>  $archive->category_id]);
+        try {
+            $request->validate([
+                'file' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,odt,mp4|max:20480', // Maks 20MB
+                'title' => 'required|string',
+                'description' => 'required|string',
+                'category_id' => 'required|integer'
+            ],
+            [
+                'file.required' => "File wajib di isi!",
+                'file.mimes' => "Ekstensi file tidka valid, hanya bisa zip, pdf, doc, docx, xls, xlsx, odt, mp4!",
+                'file.max' => "Size terlalu besar, max 20MB!",
+                'title.required' => "Title wajib di isi!",
+                'description.required' => "Description wajib di isi!",
+                'category_id.required' => "Category wajib di isi!",
+            ]);
+    
+            $archive                 = new Archive();
+            $archive->title          = $request->title;
+            $archive->description    = $request->description;
+            $archive->category_id    = $request->category_id;
+    
+            // Simpan file
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileExtension = $file->extension();
+                $allowedExtensions = ['zip', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'mp4'];
+    
+                if (!in_array($fileExtension, $allowedExtensions)) {
+                    throw new \Exception('Invalid file extension.');
+                }
+    
+                $fileName = $request->id.'_'.$request->title.'.'.$request->file->extension();
+                $filePath = $request->file('file')->storeAs('uploads', $fileName, 'public');
+                $archive->file = $fileName;
+            } else {
+                throw new \Exception('ss');
+                return redirect()->back()->withInput();
+            }
+    
+            $archive->user_id        = \Auth::user()->id;
+            $archive->save();
+            Alert::success('Success', 'Tambah data berhasil!');
+            return redirect()->route('documents.archiveShow', ['id' =>  $archive->category_id]);
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }        
     }
 
 
     public function download($file)
     {
-        $filePath = public_path('storage/uploads/' . $file);
+        // Path relatif dari folder `public/storage`
+        $filePath = storage_path('app/public/uploads/' . $file);
+
+        Log::info('Attempting to download file: ' . $filePath);
 
         if (File::exists($filePath)) {
+            Log::info('File exists, proceeding with download.');
             return Response::download($filePath);
         }
 
-        return redirect()->route('files.index')->with('error', 'File tidak ditemukan.');
+        Log::error('File not found: ' . $filePath);
+    
+        return redirect()->to('documents')->with('error', 'File tidak ditemukan.');
     }
+    
 
     public function editArchive($id)
     {
@@ -158,82 +251,94 @@ class ManagementArchiveController extends Controller
         $getId_Req                  = request()->input('input_req_edit');
         $data['get_archive_value']  = Archive::findOrFail($getId_Req);  
         $data['categories']         = Category::all();
-        $data['form_category']      = Category::findOrFail($id);
+        // $data['form_category']      = Category::findOrFail($id);
+
         return view('backoffice.manage_documents.archives._edit_document', $data);
     }
 
     public function updateArchive(Request $request)
     {
-        // return request()->all();
-        $getId_Req = request()->input('update_arc_id');
-        $document = Archive::findOrFail($getId_Req);
-
-        $request->validate([
-            'file' => 'required|mimes:zip,pdf,doc,docx,xls,xlsx,odt|max:20480', // Maks 20MB
-            'title' => 'required|string',
-            'description' => 'required|string'
-        ]);
-
-        // Update title
-        $document->title = $request->input('title');
-        $document->description = $request->input('description');
-
-        // Jika ada file baru yang diunggah
-        if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
-            if ($document->file) {
-                $oldFilePath = public_path('storage/uploads/' . $document->file);
-                if (File::exists($oldFilePath)) {
-                    File::delete($oldFilePath);
+        try {
+            $getId_Req = request()->input('update_arc_id');
+            $document = Archive::findOrFail($getId_Req);
+    
+            $request->validate([
+                'file' => 'mimes:zip,pdf,doc,docx,xls,xlsx,odt,mp4|max:20480', // Maks 20MB
+                'title' => 'required|string',
+                'description' => 'required|string',
+                'category_id' => 'required|integer'
+            ],
+            [
+                'file.mimes' => "Ekstensi file tidka valid, hanya bisa zip, pdf, doc, docx, xls, xlsx, odt, mp4!",
+                'file.max' => "Size terlalu besar, max 20MB!",
+                'title.required' => "Title wajib di isi!",
+                'description.required' => "Description wajib di isi!",
+                'category_id.required' => "Category wajib di isi!",
+            ]);
+    
+            $document->title = $request->input('title');
+            $document->description = $request->input('description');
+    
+            // dd($request);
+            if ($request->hasFile('file')) {
+                if ($document->file) {
+                    $oldFilePath = public_path('storage/uploads/' . $document->file);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
                 }
+    
+                if ($request->file()) {
+                    $fileName = $document->id.'_'.$request->title.'.'.$request->file->extension();
+                    $filePath = $request->file('file')->storeAs('uploads', $fileName, 'public');
+                }
+    
+                $document->file = $fileName;
             }
-
-            // Simpan file baru
-            // Simpan file
-            if ($request->file()) {
-                // $fileName = $request->title.'_'.$request->file->getClientOriginalName();
-                $fileName = $request->id.'_'.$request->title.'.'.$request->file->extension();
-                $filePath = $request->file('file')->storeAs('uploads', $fileName, 'public');
-            }
-
-            $document->file = $fileName;
+    
+            $document->save();
+            Alert::success('Success', 'Edit data berhasil!');
+            return redirect()->to('/documents');
+        } catch (\Throwable $th) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
         }
-
-        // return request()->input('category_id');
-
-        $document->save();
-        \Toastr::success('Edit archive successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('documents.archiveShow', ['id' =>  $document->category_id]);
     }
 
-    public function destroyArchive()
+    public function destroyArchive($id)
     {
-        $getArchive = Archive::findOrFail(request()->input('id'));
+        try {
+            $getArchive = Archive::findOrFail($id);
 
-        // Hapus file fisik jika ada
-        if ($getArchive->file) {
-            $file = public_path('storage/uploads/' . $getArchive->file);
-            if (File::exists($file)) {
-                File::delete($file);
+            // Hapus file fisik jika ada
+            if ($getArchive->file) {
+                $file = storage_path('app/public/uploads/' . $getArchive->file);
+                if (File::exists($file)) {
+                    File::delete($file);
+                }
             }
+    
+            // Hapus data dari database
+            $getArchive->delete();
+    
+            Alert::success('Success', 'Hapus data berhasil!');
+        } catch (\Exception $e) {
+            Alert::error('Error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
-
-        // Hapus data dari database
-        $getArchive->delete();
-
-        \Toastr::success('Edit is delete successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('documents.archiveShow', ['id' =>  $getArchive->category_id]);
+        return redirect()->to('/documents');
+        
     }
 
     public function previewPdf($file)
     {
-        $filePath = public_path('storage/uploads/' . $file);
+        $filePath = storage_path('app/public/uploads/' . $file);
 
         // Periksa apakah file ada
         if (!File::exists($filePath)) {
             return redirect()->back()->with('error', 'File not found.');
         }
 
+        dd(response()->file($filePath));
         // Return response untuk menampilkan file PDF
         return response()->file($filePath);
     }

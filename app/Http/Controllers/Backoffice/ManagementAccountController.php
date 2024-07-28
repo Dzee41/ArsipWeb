@@ -12,6 +12,9 @@ use App\Models\{
 
 };
 
+use RealRashid\SweetAlert\Facades\Alert;
+
+
 class ManagementAccountController extends Controller
 {
 
@@ -64,24 +67,39 @@ class ManagementAccountController extends Controller
 
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'current_password'      => 'required|min:8',
-            'new_password'          => 'required|string|min:8|different:current_password',
-            'new_confirm_password'  => 'required|string|min:8|same:new_password',
-        ]);
+        try {
+            $request->validate([
+                'current_password'      => 'required|min:8',
+                'new_password'          => 'required|string|min:8|different:current_password',
+                'new_confirm_password'  => 'required|string|min:8|same:new_password',
+            ],
+            [
+                'current_password.required' => 'Password wajib di isi!',
+                'current_password.min' => 'Password terlalu pendek, minimal 8 karakter!',
+                'new_password.required' => 'Password Baru wajib di isi!',
+                'new_password.min' => 'Password Baru terlalu pendek, minimal 8 karakter!',
+                'new_password.different' => 'Password Baru tidak boleh sama dengan password lama!',
+                'new_confirm_password.required' => 'Konfirmasi Password wajib di isi!',
+                'new_confirm_password.same' => 'Konfirmasi Password tidak sama!',
+            ]);
+    
+            $user = auth()->user();
+    
+            if (!Hash::check($request->current_password, $user->password)) {
+                Alert::error('Error', 'Current password tidak sesuai...');
+                return back()->withErrors(['current_password' => 'Current Password invaild!']);
+            }
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+    
+            auth()->logout();
 
-        $user = auth()->user();
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            \Toastr::error('Current Password invalid!', 'Error', ["positionClass" => "toast-top-right"]);
-            return back()->withErrors(['current_password' => 'Current Password invaild!']);
-        }
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        auth()->logout();
-        \Toastr::success('Update password successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('login')->with(['Success' => 'Success']);
+            Alert::success('Success', 'Ubah password berhasil!');
+            return redirect()->route('login')->with(['Success' => 'Success']);
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }  
     }
 
     public function userIndex()
@@ -94,14 +112,22 @@ class ManagementAccountController extends Controller
 
     public function changeAccountStatus()
     {
-        $request    = request();
-        $is_active  = $request->is_active;
-        $user_id    = $request->id;
-        $user               = User::findOrFail($user_id);
-        $user->is_active    = $is_active;
-        $user->save();
-        toastr()->success('Change Account is Successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('users-index');
+        try {
+            $request    = request();
+            $is_active  = $request->is_active;
+            $user_id    = $request->id;
+            $user               = User::findOrFail($user_id);
+            $user->is_active    = $is_active;
+            $user->save();
+            
+            Alert::success('Success', 'Status akun berhasil di ubah!');
+            return redirect()->route('users-index');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }  
+
+        
     }
 
     public function editUserProfile($id)
@@ -116,50 +142,73 @@ class ManagementAccountController extends Controller
 
     public function updateUserProfile(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $user->name     = $request->name;
-        $user->email    = $request->email;
-        $user->address  = $request->address;
-        $user->role_id  = $request->role_id;
+        try {
+            $user = User::findOrFail($id);
+            $user->name     = $request->name;
+            $user->email    = $request->email;
+            $user->address  = $request->address;
+            $user->role_id  = $request->role_id;
 
-        if ($request->hasFile('photo')) {
-            if ($user->photo && Storage::exists('public/photos/' . $user->photo)) {
-                Storage::delete('public/photos/' . $user->photo);
+            if ($request->hasFile('photo')) {
+                if ($user->photo && Storage::exists('public/photos/' . $user->photo)) {
+                    Storage::delete('public/photos/' . $user->photo);
+                }
+        
+                $file       = $request->file('photo');
+                $fileName   = time() . '-image-profile.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/photos', $fileName);
+                $user->photo = $fileName;
             }
-    
-            $file       = $request->file('photo');
-            $fileName   = time() . '-image-profile.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/photos', $fileName);
-            $user->photo = $fileName;
-        }
 
-        $user->save();
-        toastr()->success('Profile is Update Successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return to_route('users-index');
+            $user->save();
+
+            Alert::success('Success', 'Berhasil update data!');
+            return to_route('users-index');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }  
     }
 
     public function changeRole()
     {
-        $request = request();
-        $user_id    = $request->id;
-        $user       = User::findOrFail($user_id);
-        $user->id   = $user_id;
-        $user->role_id  = $request->role_id;
+        try {
+            $request = request();
+            $user_id    = $request->id;
+            $user       = User::findOrFail($user_id);
+            $user->id   = $user_id;
+            $user->role_id  = $request->role_id;
 
-        $user->save();
-        toastr()->success('Role is update successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('users-index');
+            $user->save();
+            
+            Alert::success('Success', 'Update role sukses!');
+            return redirect()->route('users-index');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }  
     }
 
     public function destoryUser($id)
     {
-        $user = User::findOrFail($id);
-        if ($user->photo && Storage::exists('public/photos/' . $user->photo)) {
-            Storage::delete('public/photos/' . $user->photo);
-        }
-        $user->delete();
-        toastr()->success('User is delete successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('users-index');
+        try {
+            $user = User::findOrFail($id);
+            // Hapus file fisik jika ada
+            if ($user->photo) {
+                $file = storage_path('app/public/photos/' . $user->photo);
+                if (File::exists($file)) {
+                    File::delete($file);
+                }
+            }
+
+            $user->delete();
+
+            Alert::success('Success', 'User berhasil di hapus!');
+            return redirect()->route('users-index');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }  
     }
 
     protected function validator(array $data)
@@ -173,20 +222,36 @@ class ManagementAccountController extends Controller
 
     public function newUserStore(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-        $user = new User();
-        $user->password = Hash::make($request->password);
-        $user->role_id  = 2;
-        $user->name     = $request->name;
-        $user->is_active= 0;
-        $user->email    = $request->email;
-        $user->save();
-
-        toastr()->success('New user generate successfully!', 'Success', ["positionClass" => "toast-top-right"]);
-        return redirect()->route('users-index');
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ],
+            [
+                'name.required' => 'Nama wajib di isi!',
+                'name.max' => 'Nama terlalu panjang, maksimal 255 kata!',
+                'email.required' => 'Email wajib di isi!',
+                'email.email' => 'Harus berupa format email!',
+                'email.max' => 'Email terlalu panjang!',
+                'email.unique' => 'Email sudah pernah terdaftar!',
+                'password.required' => 'Password wajib di isi!',
+                'password.min' => 'Password terlalu pendek, minimal 8 huruf!',
+                'password.confirmed' => 'Konfirmasi Password tidak sama!',
+            ]);
+            $user = new User();
+            $user->password = Hash::make($request->password);
+            $user->role_id  = 2;
+            $user->name     = $request->name;
+            $user->is_active= 0;
+            $user->email    = $request->email;
+            $user->save();
+    
+            Alert::success('Success', 'User baru berhasil dibuat!');
+            return redirect()->route('users-index');
+        } catch (\Exception $e) {
+            Alert::error('Error', ''. $e->getMessage());
+            return redirect()->back()->withInput();
+        }           
     }
 }
