@@ -27,7 +27,7 @@
                 </div>
             @endif
         </div>
-        <span class="fw-semibold d-block mb-1">{{ $label }} {{ $daily ? '*' : '' }}</span>
+        <span class="fw-semibold d-block mb-1">{{ $label }} </span>
         <h3 class="card-title mb-2">{{ $value }}</h3>
         @if($percentage > 0)
             <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{ $percentage }}%</small>

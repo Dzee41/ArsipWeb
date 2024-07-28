@@ -28,28 +28,7 @@
                 </div>
             </div>
 
-            <div class="mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between flex-sm-row flex-column gap-3"
-                             style="position: relative;">
-                            <div class="">
-                                <div class="card-title">
-                                    <h5 class="text-nowrap mb-2"></h5>
-                                    <span class="badge bg-label-warning rounded-pill"></span>
-                                </div>
-                                
-                            </div>
-                            <div>
-                                <canvas id="reportChart"></canvas>
-                            </div>
-                            {{-- <div id="profileReportChart" style="min-height: 80px; width: 80%">
-                                
-                            </div> --}}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
         </div>
         <div class="col-lg-4 col-md-4 order-1">
             <div class="row">
