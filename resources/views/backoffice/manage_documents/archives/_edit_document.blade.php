@@ -55,9 +55,12 @@
                                     </div>
                                     @if ($get_archive_value->file)
                                         <div class="row mb-3">
-                                            <p class="col-sm-10">Existing Document <a
-                                                    href="{{ asset('storage/uploads/' . basename($get_archive_value->file)) }}"
-                                                    target="_blank">View Document</a></p>
+                                            <p class="col-sm-10 pt-1">
+                                                Existing File/Document:
+                                                <a href="{{ route('file.preview', $get_archive_value->file) }}">
+                                                     {{$get_archive_value->file}}
+                                                </a>
+                                            </p>
                                         </div>
                                     @endif
                                 </div>
@@ -79,8 +82,7 @@
                             <div class="row justify-content-end">
                                 <div class="col-sm-10">
                                     <div class="btn-group">
-                                        <button class="btn btn-primary">Save</button>
-                                        {{-- <button type="submit" class="btn btn-dark">Preview</button> --}}
+                                        <button class="btn btn-primary">Save</button>             
                                     </div>
                                 </div>
                             </div>

@@ -6,12 +6,17 @@
             $category_header = \App\Models\Category::get();
             
         @endphp
+        @if (session('error'))
+            <script>
+                toastr.error('{{ session('error') }}', 'Error', { "positionClass": "toast-top-right" });
+            </script>
+        @endif
 
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Management Document /</span>
             {{ $category->category_name }}</h4>
-        <div class="btn-group">
+        <div class="btn-group pe-1">
             <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Filter by Category
+                <i class='bx bx-filter-alt text-sm-end' ></i> Filter
             </button>
             <ul class="dropdown-menu">
                 <form action="{{ route('documents.archivesIndexAll') }}" method="POST">
@@ -32,10 +37,12 @@
                 @endforeach
             </ul>
         </div>
-        <a href="{{ route('new-document', $categories->id) }}" class="btn btn-success btn-small">Input
-            {{ $category->category_name }}</a>
+        <a href="{{ route('new-document', $categories->id) }}" class="btn btn-success btn-small">
+            <i class='bx bx-folder-plus text-sm-end' ></i> Input
+            {{ $category->category_name }}
+        </a>
 
-        <div class="nav-align-top mb-4  pt-2">
+        <div class="nav-align-top mb-4 pt-3">
             <div class="tab-content">
                 {{-- @include('backoffice.manage_documents.archives.archives_index') --}}
                 {{-- tab content --}}
@@ -43,7 +50,7 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                {{-- <th>No</th> --}}
+                                <th>No</th>
                                 <th>Title</th>
                                 <th>Description</th>
                                 <th>Documents</th>
@@ -55,7 +62,7 @@
                         <tbody class="table-border-bottom-0">
                             @foreach ($categories['archives'] as $idx => $row)
                                 <tr>
-                                    {{-- <td>{{ $no++ }}</td> --}}
+                                    <td>{{ $no++ }}.</td>
                                     <td><i class="fab fa-angular fa-lg text-danger me-3"></i>
                                         <strong>{{ $row->title }}</strong>
                                     </td>
@@ -64,13 +71,28 @@
                                     <td>
                                         @php
                                             $fileName = basename($row->file);
+                                            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+                                            $previewableExtensions = ['pdf', 'mp4'];
                                         @endphp
 
                                         @if ($row->file != "") 
-                                            <p>Unduh:<br><a href="{{ route('file.download', $fileName) }}">{{$fileName}}</a></p>
-                                        
+                                        @if (in_array($fileExtension, $previewableExtensions))
+                                            <button class="btn btn-primary btn-sm">
+                                                <a class="text-white" href="{{ route('file.preview', ['id' => $row->id, 'file' => $fileName]) }}">
+                                                    @if ($fileExtension === "pdf")
+                                                    <i class='bx bxs-file-pdf'></i>
+                                                    @elseif ($fileExtension === "mp4")
+                                                    <i class='bx bxs-videos' ></i>
+                                                    @endif
+                                                    Preview 
+                                                    {{ $fileExtension }}
+                                                </a>
+                                            </button>
+                                        @else
+                                            <a class="text-decoration-underline" href="javascript:void(0);" onclick="checkAndDownloadFile('{{ $fileName }}')">No-Preview {{ $fileExtension }}</a>
+                                        @endif
                                         @else 
-                                            <p>-</p>
+                                        <p>-</p>
                                         @endif
                                     </td>
                                     <td>
@@ -93,11 +115,16 @@
                                                 @method('GET')
                                                 <input hidden name="input_req_edit" type="text"
                                                     value="{{ $row->id }}">
-                                                <button class="btn btn-warning btn-sm">Edit</button>
+                                                <button class="btn btn-warning btn-sm"><i class='bx bx-edit-alt text-sm-end' ></i> Edit</button>
                                             </form>
+
+                                            {{-- Download --}}
+                                            <a class="btn btn-sm btn-info mx-1 rounded-1" href="javascript:void(0);" onclick="checkAndDownloadFile('{{ $fileName }}')">
+                                                <i class='bx bxs-download text-sm-end' ></i> Save
+                                            </a>
                                             
                                             {{-- Delete --}}
-                                            <form id="formDelete" class="mx-1"
+                                            <form id="formDelete"
                                                 method="POST">
                                                 @csrf
                                                 @method('DELETE')
@@ -109,13 +136,6 @@
                                                     Delete
                                                 </button>
                                             </form>
-
-
-                                            <!-- Tombol Preview -->
-                                            <a href="{{ route('file.preview.pdf', $row->file) }}"
-                                                class="btn btn-sm btn-info" target="_blank">
-                                                <i class='bx bxs-file-pdf'></i> Preview PDF
-                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -166,6 +186,26 @@
         });
     }
     @endif
+
+    function checkAndDownloadFile(fileName) {
+        $.ajax({
+            url: '{{ url("/file/check") }}/' + fileName,
+            method: 'GET',
+            success: function(response) {
+                if (response.exists) {
+                    toastr.info('Process to download ' + fileName, 'Downloading...', { "positionClass": "toast-top-right" });
+                    setTimeout(function() {
+                        window.location.href = '{{ url("/download") }}/' + fileName;
+                    }, 2000);
+                } else {
+                    toastr.error('File not found', 'Error', { "positionClass": "toast-top-right" });
+                }
+            },
+            error: function() {
+                toastr.error('Error checking file', 'Error', { "positionClass": "toast-top-right" });
+            }
+        });
+    }
 
 </script>
 @endsection

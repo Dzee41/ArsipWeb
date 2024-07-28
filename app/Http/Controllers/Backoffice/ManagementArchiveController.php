@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Response;
 use App\Models\{
     Category,
     Archive,
-
 };
 use App\DataTables\ArchivesDataTable;
 use App\DataTables\ArchivesDataTableEditor;
@@ -329,8 +328,24 @@ class ManagementArchiveController extends Controller
         
     }
 
-    public function previewPdf($file)
+    // public function previewPdf($file)
+    // {
+    //     $filePath = storage_path('app/public/uploads/' . $file);
+
+    //     // Periksa apakah file ada
+    //     if (!File::exists($filePath)) {
+    //         return redirect()->back()->with('error', 'File not found.');
+    //     }
+
+    //     dd(response()->file($filePath));
+    //     // Return response untuk menampilkan file PDF
+    //     return response()->file($filePath);
+    // }
+
+    public function previewFile($id, $file)
     {
+
+        $archive = Archive::findOrFail($id);
         $filePath = storage_path('app/public/uploads/' . $file);
 
         // Periksa apakah file ada
@@ -338,8 +353,39 @@ class ManagementArchiveController extends Controller
             return redirect()->back()->with('error', 'File not found.');
         }
 
-        dd(response()->file($filePath));
-        // Return response untuk menampilkan file PDF
-        return response()->file($filePath);
+        $fileMimeType = File::mimeType($filePath);
+        $fileUrl = asset('storage/uploads/' . $file);
+
+        switch ($fileMimeType) {
+            case 'application/pdf':
+                return view('backoffice.manage_documents.archives.preview_file', [
+                    'fileType' => 'pdf', 
+                    'fileUrl' => $fileUrl,
+                    'archive' => $archive
+                ]);
+
+            case 'video/mp4':
+                return view('backoffice.manage_documents.archives.preview_file', [
+                    'fileType' => 'video', 
+                    'fileUrl' => $fileUrl,
+                    'archive' => $archive
+                ]);
+
+            default:
+                return response()->download($filePath);
+        }
     }
+
+    public function checkFile($file)
+    {
+        $filePath = storage_path('app/public/uploads/' . $file);
+
+        if (File::exists($filePath)) {
+            return response()->json(['exists' => true]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
+
+    
 }
