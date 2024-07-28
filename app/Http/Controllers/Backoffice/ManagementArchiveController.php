@@ -63,6 +63,10 @@ class ManagementArchiveController extends Controller
             $request->validate([
                 'category_name' => 'required|string',
                 'used_for'      => 'required|string'
+            ],
+            [
+                'category_name.required' => 'Nama kategori wajib di isi!',
+                'used_for.required' => 'Deskripsi wajib di isi!',
             ]);
             $id         = $request->item_id;
             $category   = Category::findOrFail($id);
@@ -120,13 +124,14 @@ class ManagementArchiveController extends Controller
         ]);
     }
 
+    // Deprecated !!
     public function archivesIndex($id=null)
     {
         $data['category'] = Category::findOrFail($id);
         return view('backoffice.manage_documents.archives.archives_index', $data);
     }
 
-
+    // Deprecated !!
     public function tabArchives(Request $request)
     {
         $get_request_id     = $request->id;
@@ -139,6 +144,7 @@ class ManagementArchiveController extends Controller
     }
 
 
+    // Filtered
     public function archiveShow(Request $request, $id)
     {
         /**
@@ -158,9 +164,6 @@ class ManagementArchiveController extends Controller
             $archive->formatted_created_at = Carbon::parse($archive->created_at)->translatedFormat('l, j F Y, H:i');
             $archive->formatted_updated_at = Carbon::parse($archive->updated_at)->translatedFormat('l, j F Y, H:i');
         }
-
-        // dd($archive->formatted_updated_at);
-
 
         return view('backoffice.manage_documents.archives._archive_table', $data);
     }
@@ -231,14 +234,9 @@ class ManagementArchiveController extends Controller
         // Path relatif dari folder `public/storage`
         $filePath = storage_path('app/public/uploads/' . $file);
 
-        Log::info('Attempting to download file: ' . $filePath);
-
         if (File::exists($filePath)) {
-            Log::info('File exists, proceeding with download.');
             return Response::download($filePath);
         }
-
-        Log::error('File not found: ' . $filePath);
     
         return redirect()->to('documents')->with('error', 'File tidak ditemukan.');
     }
@@ -278,7 +276,6 @@ class ManagementArchiveController extends Controller
             $document->title = $request->input('title');
             $document->description = $request->input('description');
     
-            // dd($request);
             if ($request->hasFile('file')) {
                 if ($document->file) {
                     $oldFilePath = public_path('storage/uploads/' . $document->file);
@@ -325,22 +322,7 @@ class ManagementArchiveController extends Controller
             Alert::error('Error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
         return redirect()->to('/documents');
-        
     }
-
-    // public function previewPdf($file)
-    // {
-    //     $filePath = storage_path('app/public/uploads/' . $file);
-
-    //     // Periksa apakah file ada
-    //     if (!File::exists($filePath)) {
-    //         return redirect()->back()->with('error', 'File not found.');
-    //     }
-
-    //     dd(response()->file($filePath));
-    //     // Return response untuk menampilkan file PDF
-    //     return response()->file($filePath);
-    // }
 
     public function previewFile($id, $file)
     {
@@ -386,6 +368,4 @@ class ManagementArchiveController extends Controller
 
         return response()->json(['exists' => false]);
     }
-
-    
 }

@@ -25,41 +25,41 @@ class DashboardController extends Controller
         $totalUsersActive = User::where('is_active', 1)->count();
         $totalCategory = Category::get()->count();
 
-        // Hitung total arsip dalam 7 hari terakhir
-        $startDate = Carbon::now('Asia/Jakarta')->subDays(7);
-        $endDate = Carbon::now('Asia/Jakarta');
-        $currentWeekArchives = Archive::whereBetween('created_at', [$startDate, $endDate])->count();
+        // // Hitung total arsip dalam 7 hari terakhir
+        // $startDate = Carbon::now('Asia/Jakarta')->subDays(7);
+        // $endDate = Carbon::now('Asia/Jakarta');
+        // $currentWeekArchives = Archive::whereBetween('created_at', [$startDate, $endDate])->count();
 
-        // Hitung total arsip dalam 7 hari sebelum 7 hari terakhir
-        $previousStartDate = Carbon::now('Asia/Jakarta')->subDays(14);
-        $previousEndDate = Carbon::now('Asia/Jakarta')->subDays(7);
-        $previousWeekArchives = Archive::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
+        // // Hitung total arsip dalam 7 hari sebelum 7 hari terakhir
+        // $previousStartDate = Carbon::now('Asia/Jakarta')->subDays(14);
+        // $previousEndDate = Carbon::now('Asia/Jakarta')->subDays(7);
+        // $previousWeekArchives = Archive::whereBetween('created_at', [$previousStartDate, $previousEndDate])->count();
 
-        // Hitung persentase pertumbuhan
-        if ($previousWeekArchives > 0) {
-            $percentageChange = (($currentWeekArchives - $previousWeekArchives) / $previousWeekArchives) * 100;
-        } else {
-            // Jika tidak ada arsip sebelumnya, anggap pertumbuhan 100%
-            $percentageChange = 100;
-        }
+        // // Hitung persentase pertumbuhan
+        // if ($previousWeekArchives > 0) {
+        //     $percentageChange = (($currentWeekArchives - $previousWeekArchives) / $previousWeekArchives) * 100;
+        // } else {
+        //     // Jika tidak ada arsip sebelumnya, anggap pertumbuhan 100%
+        //     $percentageChange = 100;
+        // }
 
-        // Mengambil data laporan masuk dalam 7 hari terakhir
-        $reportData = Archive::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('count(*) as count')
-        )
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->groupBy('date')
-        ->orderBy('date', 'ASC')
-        ->get()
-        ->pluck('count', 'date')
-        ->toArray();
+        // // Mengambil data laporan masuk dalam 7 hari terakhir
+        // $reportData = Archive::select(
+        //     DB::raw('DATE(created_at) as date'),
+        //     DB::raw('count(*) as count')
+        // )
+        // ->whereBetween('created_at', [$startDate, $endDate])
+        // ->groupBy('date')
+        // ->orderBy('date', 'ASC')
+        // ->get()
+        // ->pluck('count', 'date')
+        // ->toArray();
 
-        // Format data untuk Chart.js
-        $chartData = [
-            'labels' => array_keys($reportData),
-            'data' => array_values($reportData),
-        ];
+        // // Format data untuk Chart.js
+        // $chartData = [
+        //     'labels' => array_keys($reportData),
+        //     'data' => array_values($reportData),
+        // ];
 
         return view('home', [
             'archives' => $archives,
@@ -69,7 +69,7 @@ class DashboardController extends Controller
             'totalUsers' => $totalUsers,
             'totalUsersActive' => $totalUsersActive,
             'totalCategory' => $totalCategory,
-            'chartData' => $chartData
+            // 'chartData' => $chartData
         ]);
     }
 }

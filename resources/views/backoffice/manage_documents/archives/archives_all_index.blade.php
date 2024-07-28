@@ -159,8 +159,8 @@
             text: "Data yang sudah dihapus tidak bisa dikembalikan lagi",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
             cancelButtonText: 'Batal',
             confirmButtonText: 'Hapus'
         }).then((result) => {
@@ -202,7 +202,7 @@
                 }
             },
             error: function() {
-                toastr.error('Error checking file', 'Error', { "positionClass": "toast-top-right" });
+                toastr.error('File not found', 'Error', { "positionClass": "toast-top-right" });
             }
         });
     }

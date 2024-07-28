@@ -57,7 +57,7 @@
                                         <div class="row mb-3">
                                             <p class="col-sm-10 pt-1">
                                                 Existing File/Document:
-                                                <a href="{{ route('file.preview', $get_archive_value->file) }}">
+                                                <a href="{{ route('file.preview', ['id' => $get_archive_value->id, 'file' => $get_archive_value->file] ) }}">
                                                      {{$get_archive_value->file}}
                                                 </a>
                                             </p>

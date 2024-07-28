@@ -14,9 +14,9 @@
                         <div class="card-body">
                             <h4 class="card-title text-primary">Selamat Datang, <b>{{ auth()->user()->name }}!</b></h4>
                             <p class="mb-4">
-                                {{ $dateNow }}
+                                {{-- {{ $dateNow }} --}}
                             </p>
-                            <p style="font-size: smaller" class="text-gray">*) Cek dokumen</p>
+                            <p style="font-size: smaller" class="text-gray">&nbsp;</p>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">
@@ -66,7 +66,7 @@
                 <div class="col-lg-6 col-md-12 col-6 mb-4">
                     <x-dashboard-card-simple
                         :label="__('Total Users')"
-                        :value="$totalUsersActive"
+                        :value="$totalUsers"
                         :daily="true"
                         color="success"
                         icon="bxs-user-account"
@@ -76,7 +76,7 @@
                 <div class="col-lg-6 col-md-12 col-6 mb-4">
                     <x-dashboard-card-simple
                         :label="__('User Active')"
-                        :value="$totalUsers"
+                        :value="$totalUsersActive"
                         :daily="true"
                         color="warning"
                         icon="bx-user-check"
@@ -100,7 +100,7 @@
 @endsection
 
 @section('sweetalert2')
-<script>
+{{-- <script>
     var ctx = document.getElementById('reportChart').getContext('2d');
     var chartData = @json($chartData);
 
@@ -124,5 +124,5 @@
             }
         }
     });
-</script>
+</script> --}}
 @endsection

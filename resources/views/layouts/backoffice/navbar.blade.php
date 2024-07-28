@@ -1,3 +1,7 @@
+@php
+    use Carbon\Carbon;
+    $dateNow = Carbon::now('Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY, HH:mm', 'id');
+@endphp
 <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
     <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
         <i class="bx bx-menu bx-sm"></i>
@@ -8,9 +12,10 @@
     <!-- Search -->
     <div class="navbar-nav align-items-center">
         <div class="nav-item d-flex align-items-center">
-            <i class="bx bx-search fs-4 lh-0"></i>
+            {{ $dateNow }}
+            {{-- <i class="bx bx-search fs-4 lh-0"></i>
             <input type="text" class="form-control border-0 shadow-none" placeholder="Search..."
-                aria-label="Search..." />
+                aria-label="Search..." /> --}}
         </div>
     </div>
     <!-- /Search -->
