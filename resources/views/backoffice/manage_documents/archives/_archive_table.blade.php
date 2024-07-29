@@ -37,10 +37,13 @@
                 @endforeach
             </ul>
         </div>
+
+        @if (auth()->user()->role_id == "1")
         <a href="{{ route('new-document', $categories->id) }}" class="btn btn-success btn-small">
             <i class='bx bx-folder-plus text-sm-end' ></i> Input
             {{ $category->category_name }}
         </a>
+        @endif
 
         <div class="nav-align-top mb-4 pt-3">
             <div class="tab-content">
@@ -105,6 +108,7 @@
 
                                     <td>
                                         <div class="btn-group">
+                                            @if (auth()->user()->role_id == "1")
                                             {{-- Edit --}}
                                             <form 
                                                 action="{{ route('edit-archive.editArchive', [
@@ -117,12 +121,14 @@
                                                     value="{{ $row->id }}">
                                                 <button class="btn btn-warning btn-sm"><i class='bx bx-edit-alt text-sm-end' ></i> Edit</button>
                                             </form>
+                                            @endif
 
                                             {{-- Download --}}
                                             <a class="btn btn-sm btn-info mx-1 rounded-1" href="javascript:void(0);" onclick="checkAndDownloadFile('{{ $fileName }}')">
                                                 <i class='bx bxs-download text-sm-end' ></i> Save
                                             </a>
                                             
+                                            @if (auth()->user()->role_id == "1")
                                             {{-- Delete --}}
                                             <form id="formDelete"
                                                 method="POST">
@@ -136,6 +142,7 @@
                                                     Delete
                                                 </button>
                                             </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

@@ -47,9 +47,11 @@
         </div>
 
         @if ($category)
+            @if (auth()->user()->role_id == "1")
             <a href="{{ route('new-document', $category->id) }}" class="btn btn-success btn-small">
                 <i class='bx bx-folder-plus text-sm-end'></i> Input Dokumen
             </a>
+            @endif
         @endif
 
         <div class="nav-align-top mb-4 pt-3">
@@ -114,6 +116,7 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            @if (auth()->user()->role_id == "1")
                                             {{-- Edit --}}
                                             <form 
                                                 action="{{ route('edit-archive.editArchive', [
@@ -126,12 +129,14 @@
                                                     value="{{ $row->id }}">
                                                 <button class="btn btn-warning btn-sm"><i class='bx bx-edit-alt text-sm-end' ></i> Edit</button>
                                             </form>
+                                            @endif
 
                                             {{-- Download --}}
                                             <a class="btn btn-sm btn-info mx-1 rounded-1" href="javascript:void(0);" onclick="checkAndDownloadFile('{{ $fileName }}')">
                                                 <i class='bx bxs-download text-sm-end' ></i> Save
                                             </a>
                                             
+                                            @if (auth()->user()->role_id == "1")
                                             {{-- Delete --}}
                                             <form id="formDelete"                                                 
                                                 method="POST">
@@ -141,7 +146,8 @@
                                                     data-action="{{ route('destroy-archive.destroyArchive', $row->id) }}"
                                                     ><i class='bx bx-trash text-sm-end' ></i> Delete
                                                 </button>
-                                            </form>                                                
+                                            </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

@@ -1,8 +1,9 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Management User /</span> Users List</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Management Kategori /</span> Semua Kategori</h4>
 
+        @if (auth()->user()->role_id == "1")
         <div class="row">
             <div class="col">
                 <div class="nav-align-top mb-4">
@@ -15,6 +16,7 @@
                 </div>
             </div>
         </div>
+        @endif
         <!-- Basic Bootstrap Table -->
         <div class="card">
             <h5 class="card-header">Table Category</h5>
@@ -24,7 +26,9 @@
                         <tr>
                             <th>Categories</th>
                             <th>Used For</th>
+                            @if (auth()->user()->role_id == "1")
                             <th>Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     {{-- table --}}
@@ -33,6 +37,7 @@
                             <tr>
                                 <td>{{ $item->category_name }}</td>
                                 <td>{{ $item->used_for }}</td>
+                                @if (auth()->user()->role_id == "1")
                                 <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
@@ -54,6 +59,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                @endif
                             </tr>
 
 
@@ -73,11 +79,13 @@
     </div>
 
     <!-- Modal Input Category -->
+    @if (auth()->user()->role_id == "1")
     <div class="modal fade" id="inputCategory" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             @include('backoffice.manage_documents.categories._modal_create')
         </div>
     </div>
+    @endif
 
     @push('scripts')
         <script>

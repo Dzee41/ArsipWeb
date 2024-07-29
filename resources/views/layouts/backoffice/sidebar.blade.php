@@ -55,6 +55,7 @@
             </li>
         </ul>
     </li>
+    @if ( auth()->user()->role_id == "1" )
     {{-- management users --}}
     <li 
         class="menu-item {{ request()->routeIs('users-index') || 
@@ -86,7 +87,8 @@
                 </a>
             </li>
         </ul>
-    </li>
+    </li>  
+    @endif
 
 
 </ul>
